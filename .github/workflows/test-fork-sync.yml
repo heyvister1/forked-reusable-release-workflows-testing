@@ -12,5 +12,7 @@ jobs:
     with:
       upstream-owner: almaslennikov
       default-branch: main
+      service-account-username: heyvister1
+      service-account-email: iheyvi@nvidia.com    
     secrets:
       gh_token: ${{ secrets.TESTING_GH_TOKEN }}
