@@ -1,12 +1,3 @@
-# Ensure required variables are set
-ifndef DOCKER_REGISTRY
-$(error DOCKER_REGISTRY is not set)
-endif
-
-ifndef DOCKER_TAG
-$(error DOCKER_TAG is not set)
-endif
-
 RELEASE_FILE := hack/release.yaml
 
 .PHONY: default
@@ -24,8 +15,23 @@ yq: $(YQ) ## Download yq locally if necessary.
 $(YQ): | $(LOCALBIN)
 	@curl -fsSL -o $(YQ) https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/yq_linux_amd64 && chmod +x $(YQ)
 
+.PHONY: build
+build:
+	go build -o $(LOCALBIN)/app .
+
+.PHONY: clean
+clean:
+	rm -f $(LOCALBIN)/app
+	go clean
+
 .PHONY: release-build
 release-build: | $(YQ)
+ifndef DOCKER_REGISTRY
+	$(error DOCKER_REGISTRY is not set)
+endif
+ifndef DOCKER_TAG
+	$(error DOCKER_TAG is not set)
+endif
 	@echo "Checking if release.yaml has been updated..."
 	@if [ "$$($(YQ) e '.TestingComponent.repository' $(RELEASE_FILE))" != "$(DOCKER_REGISTRY)" ]; then \
 	    echo "Error: repository is not set correctly in $(RELEASE_FILE)"; exit 1; \
